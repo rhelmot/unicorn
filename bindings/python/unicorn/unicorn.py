@@ -34,11 +34,21 @@ _all_windows_dlls = (
     "libglib-2.0-0.dll",
 )
 
+_loaded_windows_dlls = set()
+
 def _load_win_support(path):
     for dll in _all_windows_dlls:
+        if dll in _loaded_windows_dlls:
+            continue
+
         lib_file = os.path.join(path, dll)
-        if os.path.exists(lib_file):
+        if ('/' not in path and '\\' not in path) or os.path.exists(lib_file):
             ctypes.cdll.LoadLibrary(lib_file)
+            _loaded_windows_dlls.add(dll)
+
+# Initial attempt: load all dlls globally
+if sys.platform in ('win32', 'cygwin'):
+    _load_win_support('')
 
 def _load_lib(path):
     try:
